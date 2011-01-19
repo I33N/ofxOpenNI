@@ -15,7 +15,14 @@ ofxOpenNIContext::ofxOpenNIContext()
 //----------------------------------------
 bool ofxOpenNIContext::setup(){
 	XnStatus result = context.Init();
+	if(result != XN_STATUS_OK) {
+		is_initialized = false;
+	} else {
+		is_initialized = true;
+	}
 	BOOL_RC(result, "ofxOpenNIContext.setup()");
+	
+	return is_initialized;
 }
 
 

@@ -13,7 +13,9 @@ public:
 	bool setup(ofxOpenNIContext* pContext, ofxDepthGenerator* pDepthGenerator);
 	
 	void draw();
-	
+	void drawUsers();
+	void drawScene();
+
 	void update();
 	
 	void requestCalibration(XnUserID nID);
@@ -32,8 +34,8 @@ public:
 	
 	std::vector<ofxTrackedUser*> getTrackedUsers();
 
+
 private:	
-	void drawUsers();
 	void drawUser(int nUserNum);
 	
 	XnBool needs_pose;
@@ -44,6 +46,10 @@ private:
 	std::vector<ofxTrackedUser*> tracked_users;
 	XnUInt16 num_users;
 	XnUInt16 found_users;
+	
+	ofTexture scene_texture;
+	unsigned char * scene_pixels;
+
 	
 	bool is_initialized;
 	bool found_user;

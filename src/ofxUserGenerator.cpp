@@ -6,10 +6,10 @@
 // =============================================================================
 // Callback: New user was detected
 void XN_CALLBACK_TYPE User_NewUser(
-	xn::UserGenerator& rGenerator
-	,XnUserID nID
-	,void* pCookie
-)
+								   xn::UserGenerator& rGenerator
+								   ,XnUserID nID
+								   ,void* pCookie
+								   )
 {
 	printf("New User %d\n", nID);
 	ofxUserGenerator* user = static_cast<ofxUserGenerator*>(pCookie);
@@ -23,21 +23,21 @@ void XN_CALLBACK_TYPE User_NewUser(
 
 // Callback: An existing user was lost
 void XN_CALLBACK_TYPE User_LostUser(
-	xn::UserGenerator& rGenerator
-	,XnUserID nID
-	,void* pCookie
-)
+									xn::UserGenerator& rGenerator
+									,XnUserID nID
+									,void* pCookie
+									)
 {
 	printf("Lost user %d\n", nID);
 }
 
 // Callback: Detected a pose
 void XN_CALLBACK_TYPE UserPose_PoseDetected(
-	xn::PoseDetectionCapability& rCapability
-	,const XnChar* strPose
-	,XnUserID nID
-	,void* pCookie
-)
+											xn::PoseDetectionCapability& rCapability
+											,const XnChar* strPose
+											,XnUserID nID
+											,void* pCookie
+											)
 {
 	ofxUserGenerator* user = static_cast<ofxUserGenerator*>(pCookie);
 	printf("Pose %s detected for user %d\n", strPose, nID);
@@ -48,21 +48,21 @@ void XN_CALLBACK_TYPE UserPose_PoseDetected(
 
 
 void XN_CALLBACK_TYPE UserCalibration_CalibrationStart(
-	 xn::SkeletonCapability& capability
-	,XnUserID nID
-	,void* pCookie
-)
+													   xn::SkeletonCapability& capability
+													   ,XnUserID nID
+													   ,void* pCookie
+													   )
 {
 	printf("Calibration started for user %d\n", nID);
 }
 
 
 void XN_CALLBACK_TYPE UserCalibration_CalibrationEnd(
-	 xn::SkeletonCapability& rCapability
-	,XnUserID nID
-	,XnBool bSuccess
-	,void* pCookie
-)
+													 xn::SkeletonCapability& rCapability
+													 ,XnUserID nID
+													 ,XnBool bSuccess
+													 ,void* pCookie
+													 )
 {
 	ofxUserGenerator* user = static_cast<ofxUserGenerator*>(pCookie);
 	if(bSuccess) {
@@ -78,6 +78,22 @@ void XN_CALLBACK_TYPE UserCalibration_CalibrationEnd(
 		}
 	}
 }
+
+XnFloat Colors[][3] =
+{
+	{0,1,1},
+	{0,0,1},
+	{0,1,0},
+	{1,1,0},
+	{1,0,0},
+	{1,.5,0},
+	{.5,1,0},
+	{0,.5,1},
+	{.5,0,1},
+	{1,1,.5},
+	{1,1,1}
+};
+XnUInt32 nColors = 10;
 
 // OFXUSERGENERATOR
 // =============================================================================
@@ -121,9 +137,7 @@ bool ofxUserGenerator::setup(ofxOpenNIContext* pContext, ofxDepthGenerator* pDep
 	XnStatus result = XN_STATUS_OK;
 	
 	// check if the USER generator exists.
-	result = context
-				->getXnContext()
-				.FindExistingNode(XN_NODE_TYPE_USER, user_generator);
+	result = context->getXnContext().FindExistingNode(XN_NODE_TYPE_USER, user_generator);
 	SHOW_RC(result, "Find user generator");
 	if(result != XN_STATUS_OK) {
 		// create user generator.
@@ -137,19 +151,19 @@ bool ofxUserGenerator::setup(ofxOpenNIContext* pContext, ofxDepthGenerator* pDep
 	// register user callbacks/
 	XnCallbackHandle user_cb_handle;
 	user_generator.RegisterUserCallbacks(
-		 User_NewUser
-		,User_LostUser
-		,this
-		,user_cb_handle
-	);
+										 User_NewUser
+										 ,User_LostUser
+										 ,this
+										 ,user_cb_handle
+										 );
 	
 	XnCallbackHandle calibration_cb_handle;
 	user_generator.GetSkeletonCap().RegisterCalibrationCallbacks(
-		UserCalibration_CalibrationStart
-		,UserCalibration_CalibrationEnd
-		,this
-		,calibration_cb_handle
-	);
+																 UserCalibration_CalibrationStart
+																 ,UserCalibration_CalibrationEnd
+																 ,this
+																 ,calibration_cb_handle
+																 );
 	
 	// check if we need to pose for calibration
 	if(user_generator.GetSkeletonCap().NeedPoseForCalibration()) {
@@ -160,11 +174,11 @@ bool ofxUserGenerator::setup(ofxOpenNIContext* pContext, ofxDepthGenerator* pDep
 		}
 		XnCallbackHandle user_pose_cb_handle;
 		user_generator.GetPoseDetectionCap().RegisterToPoseCallbacks(
-			UserPose_PoseDetected
-			,NULL
-			,this
-			,user_pose_cb_handle
-		);
+																	 UserPose_PoseDetected
+																	 ,NULL
+																	 ,this
+																	 ,user_pose_cb_handle
+																	 );
 		user_generator.GetSkeletonCap().GetCalibrationPose(calibration_pose);
 	}
 	
@@ -177,6 +191,13 @@ bool ofxUserGenerator::setup(ofxOpenNIContext* pContext, ofxDepthGenerator* pDep
 		tracked_users.push_back(tracked_user);
 	}
 	is_initialized = true;
+	
+	user_generator.StartGenerating();
+	
+	scene_texture.allocate(640, 480, GL_RGBA);		
+	scene_pixels = new unsigned char[640 * 480 * 4];
+	memset(scene_pixels, 0, 640 * 480 * 4 * sizeof(unsigned char));
+	
 	return true;
 }
 
@@ -199,6 +220,68 @@ void ofxUserGenerator::drawUser(int nUserNum) {
 	tracked_users.at(nUserNum)->debugDraw();
 }
 
+// Draw the sceneanalyzer 
+//----------------------------------------
+void ofxUserGenerator::drawScene(){
+	// get meta-data
+	xn::DepthMetaData dmd;
+	xn::SceneMetaData smd;
+	depth_generator->getXnDepthGenerator().GetMetaData(dmd);	
+	user_generator.GetUserPixels(0, smd);
+	
+	
+	// get the pixels
+	const XnDepthPixel* depth = dmd.Data();
+	const XnLabel* pLabels = smd.Data();
+	
+	XN_ASSERT(depth);
+	
+	if (dmd.FrameID() == 0){
+		return;
+	}
+	if (dmd.PixelFormat() == XN_PIXEL_FORMAT_RGB24) {
+		printf("its in yuv\n");
+	}
+	
+	// copy depth into texture-map
+
+	for (XnUInt16 y = dmd.YOffset(); y < dmd.YRes() + dmd.YOffset(); y++) {
+		unsigned char * texture = (unsigned char*)scene_pixels + y * dmd.XRes() * 4 + dmd.XOffset()*4;
+		for (XnUInt16 x = 0; x < dmd.XRes(); x++, depth++, texture+=4, pLabels++){
+			
+			XnUInt8 red = 0;
+			XnUInt8 green = 0;
+			XnUInt8 blue = 0;
+			XnUInt8 alpha = 255;
+			
+			XnLabel label = *pLabels;
+			XnUInt32 nColorID = label % nColors;
+			
+			if (label == 0){
+				nColorID = nColors;
+			}		
+			
+			if (*depth != 0){	
+				float d =  *depth/10.0;
+				green = d * Colors[nColorID][0]; 
+				red = d * Colors[nColorID][1];
+				blue = d * Colors[nColorID][2];
+			}
+					
+			texture[0] = red;
+			texture[1] = green;
+			texture[2] = blue;
+			
+			if (*depth == 0)
+				texture[3] = 0;
+			else
+				texture[3] = alpha;
+		}	
+	}		
+	
+	scene_texture.loadData((unsigned char *)scene_pixels,dmd.XRes(), dmd.YRes(), GL_RGBA);	
+	scene_texture.draw(0,0,640,480);
+}
 
 // Get a ref to the xn::UserGenerator object.
 //----------------------------------------
@@ -269,7 +352,9 @@ void ofxUserGenerator::draw() {
 	if(!is_initialized) {
 		return;
 	}
-
+	glColor3f(1.0, 1.0, 1.0);
+	drawScene();
+	
 	drawUsers();
 	if(!found_user) {
 		glColor3f(1.0, 0, 0);

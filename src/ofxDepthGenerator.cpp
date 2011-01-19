@@ -43,6 +43,7 @@ void CreateRainbowPallet() {
 ofxDepthGenerator::ofxDepthGenerator(){
 	CreateRainbowPallet();	
 	depth_coloring = 2;
+	updateTexture = false;
 }
 
 bool ofxDepthGenerator::setup(ofxOpenNIContext* pContext) {
@@ -88,6 +89,7 @@ bool ofxDepthGenerator::setup(ofxOpenNIContext* pContext) {
 	map_mode.nYRes = XN_VGA_Y_RES;
 	map_mode.nFPS = 30;
 	
+	
 	result = depth_generator.SetMapOutputMode(map_mode);
 	max_depth = depth_generator.GetDeviceMaxDepth();		
 	
@@ -99,10 +101,22 @@ bool ofxDepthGenerator::setup(ofxOpenNIContext* pContext) {
 	return true;
 	
 }
+
+void ofxDepthGenerator::setMirrored(bool m){
+	depth_generator.GetMirrorCap().SetMirror(m);	
+}
+
 void ofxDepthGenerator::draw(float x, float y, float w, float h){
-	generateTexture();
+	if(updateTexture){
+		generateTexture();
+		updateTexture = false;
+	}
 	glColor3f(1,1,1);
 	depth_texture.draw(x, y, w, h);	
+}
+
+void ofxDepthGenerator::update(){
+	updateTexture = true;
 }
 
 xn::DepthGenerator& ofxDepthGenerator::getXnDepthGenerator() {

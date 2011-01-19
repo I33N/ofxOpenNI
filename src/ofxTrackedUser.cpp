@@ -93,6 +93,10 @@ void ofxTrackedUser::updateLimb(ofxLimb& rLimb) {
 	rLimb.found = true;
 	rLimb.begin.set(pos[0].X, pos[0].Y);
 	rLimb.end.set(pos[1].X, pos[1].Y);	
+	
+	rLimb.worldBegin.set(a.position.X, a.position.Y, a.position.Z);
+	rLimb.worldEnd.set(b.position.X, b.position.Y, b.position.Z);
+	
 }
 
 void ofxTrackedUser::debugDraw() {
