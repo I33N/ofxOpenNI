@@ -1,10 +1,10 @@
 #pragma once
 
-#include "ofMain.h"
 #include <XnOpenNI.h>
 #include <XnCodecIDs.h>
 #include <XnCppWrapper.h>
 #include "ofxOpenNIXML.h"
+#include "ofMain.h"
 #include <fstream>
 class ofxDepthGenerator;
 
