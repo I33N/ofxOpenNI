@@ -182,7 +182,6 @@ public:
 	}
 };
 /*
- /*
  <OpenNI>
  <Licenses>
 	<License vendor="PrimeSense" key="0KOIk2JeIBYClPWVnMoRKn5cdY4="/>

@@ -31,9 +31,9 @@ bool ofxOpenNIContext::setup(){
 bool ofxOpenNIContext::setupUsingRecording(std::string sFileRecording) {
 	//setup();
 	//addLicense("PrimeSense","0KOIk2JeIBYClPWVnMoRKn5cdY4=");
-	setupUsingXMLFile(ofToDataPath("openni/config/ofxopenni_licenses.xml",true));
+	setupUsingXMLFile(ofToDataPath("License.xml",true));
 	// load license
-	std::string license_file = ofToDataPath("openni/config/ofxopenni_licenses.xml",true);
+	std::string license_file = ofToDataPath("License.xml",true);
 	context.RunXmlScriptFromFile(license_file.c_str());
 	is_using_recording = true;
 	XnStatus result = XN_STATUS_OK;
@@ -51,7 +51,7 @@ bool ofxOpenNIContext::setupUsingXMLObject(ofxOpenNIXML oXML) {
 	setupUsingXMLFile(tmp_name);
 	//return runXMLScript(xml);
 }
-
+/*
 bool ofxOpenNIContext::runXMLScript(std::string sXML) {
 	XnStatus result = XN_STATUS_OK;
 	xn::EnumerationErrors errors;
@@ -62,7 +62,7 @@ bool ofxOpenNIContext::runXMLScript(std::string sXML) {
 	}
 	return true;
 }
-
+*/
 void ofxOpenNIContext::logErrors(xn::EnumerationErrors& rErrors) {
 	for(xn::EnumerationErrors::Iterator it = rErrors.Begin(); it != rErrors.End(); ++it) {
 		XnChar desc[512];
